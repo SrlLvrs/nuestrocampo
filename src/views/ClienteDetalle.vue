@@ -13,6 +13,7 @@
                     <th></th>
                     <th>Nombre</th>
                     <th>Dirección</th>
+                    <th>Frecuencia</th>
                     <th>Teléfono</th>
                     <th>Teléfono 2</th>
                     <th>Día de reparto</th>
@@ -34,6 +35,7 @@
                     </th>
                     <th> {{ item.Nombre }}</th>
                     <td> {{ item.Direccion }}, {{ item.NombreSector }}, {{ item.Comuna }}</td>
+                    <td> {{ item.Frecuencia }} </td>
                     <td> {{ item.Telefono }}</td>
                     <td> {{ item.Telefono2 }}</td>
                     <td> {{ item.Dia_de_Reparto }}</td>
@@ -44,7 +46,7 @@
     </div>
 
     <!-- Pedidos pendientes de pago -->
-    <div v-if="pendientes">
+    <div v-if="pendientes && pendientes.length > 0">
         <div class="prose max-w-none mt-8">
             <h1 class="text-center p-4 m-0">Pedidos pendientes de pago</h1>
         </div>
@@ -58,7 +60,7 @@
                         <th>Pagado</th>
                         <th>Medio de Pago</th>
                         <th>Hora y Fecha de Entrega</th>
-                        <th>Detalle</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <!-- Body -->
@@ -72,15 +74,25 @@
                         <td>
                             <!-- Detalle Pedido -->
                             <DetallePedidoMinimal :label="item.ID + 'detail'" :id="item.ID" />
+
+                            <!-- Pagar Pedido -->
+                            <PagarPedidoEfectivo :id="item.ID" :label="item.ID + 'efectivo'" />
+                            <PagarPedidoTransferencia :id="item.ID" :label="item.ID + 'transferencia'" />
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+    <div v-else-if="pendientes">
+        <div class="prose max-w-none mt-8">
+            <h1 class="text-center p-4 m-0">Pedidos pendientes de pago</h1>
+            <p class="text-center">No se encontraron pedidos pendientes de pago para este cliente.</p>
+        </div>
+    </div>
 
     <!-- Próximos pedidos -->
-    <div v-if="futuros">
+    <div v-if="futuros && futuros.length > 0">
         <div class="prose max-w-none mt-8">
             <h1 class="text-center p-4 m-0">Próximos pedidos</h1>
         </div>
@@ -94,7 +106,7 @@
                         <th>Pagado</th>
                         <th>Medio de Pago</th>
                         <th>Fecha de Entrega</th>
-                        <th>Detalle</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <!-- Body -->
@@ -108,15 +120,24 @@
                         <td>
                             <!-- Detalle Pedido -->
                             <DetallePedidoMinimal :label="item.ID + 'next'" :id="item.ID" />
+
+                            <!-- Editar Pedido -->
+                            <EditarPedido :label="item.ID + 'edit'" :id="item.ID" />
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+    <div v-else-if="futuros">
+        <div class="prose max-w-none mt-8">
+            <h1 class="text-center p-4 m-0">Próximos pedidos</h1>
+            <p class="text-center">No hay próximos pedidos programados para este cliente.</p>
+        </div>
+    </div>
 
     <!-- Pedidos anteriores -->
-    <div v-if="pasados" >
+    <div v-if="pasados && pasados.length > 0">
         <div class="prose max-w-none mt-8">
             <h1 class="text-center p-4 m-0">Pedidos pasados</h1>
         </div>
@@ -130,7 +151,7 @@
                         <th>Pagado</th>
                         <th>Medio de Pago</th>
                         <th>Fecha de Entrega</th>
-                        <th>Detalle</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <!-- Body -->
@@ -150,6 +171,12 @@
             </table>
         </div>
     </div>
+    <div v-else-if="pasados">
+        <div class="prose max-w-none mt-8">
+            <h1 class="text-center p-4 m-0">Pedidos pasados</h1>
+            <p class="text-center mb-8">Este cliente no tiene pedidos anteriores registrados.</p>
+        </div>
+    </div>
 
 </template>
 
@@ -157,6 +184,9 @@
 //Para usar axios, primero hay que instalarlo usando: 'npm install axios'
 import axios from "axios";
 import DetallePedidoMinimal from "../components/DetallesPedidoMinimal.vue";
+import PagarPedidoEfectivo from "../components/PagarPedidoEfectivo.vue";
+import PagarPedidoTransferencia from "../components/PagarPedidoTransferencia.vue";
+import EditarPedido from "../components/EditarPedido.vue";
 
 export default {
     //Nombre del componente
@@ -178,6 +208,7 @@ export default {
 
     methods: {
         async getInfoCliente() {
+            //REVISAR ESTOS 4 ENDPOINTS
             const urls = [
                 `https://nuestrocampo.cl/api/clientes/read-detail.php?id=${this.id}`,
                 `https://nuestrocampo.cl/api/pedidos/read-debt.php?id=${this.id}`,
@@ -216,7 +247,7 @@ export default {
         //Nada por aqui
     },
 
-    components: { DetallePedidoMinimal },
+    components: { DetallePedidoMinimal, PagarPedidoEfectivo, PagarPedidoTransferencia, EditarPedido },
 
     mounted() {
         this.getInfoCliente()

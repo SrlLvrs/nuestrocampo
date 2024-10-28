@@ -19,7 +19,7 @@ $query = "  SELECT
                 p.ID,
                 p.IDPA,
                 p.IDCliente,
-                p.IDRepartidor,
+                s.IDRepartidor,
                 u.Username AS NombreRepartidor,
                 p.Estado,
                 p.Pagado,
@@ -29,7 +29,7 @@ $query = "  SELECT
                 pedidos p
                 JOIN clientes c ON p.IDCliente = c.ID
                 JOIN sector s ON c.IDSector = s.ID
-                JOIN usuarios u ON p.IDRepartidor = u.ID
+                JOIN usuarios u ON s.IDRepartidor = u.ID
             WHERE
                 p.IDCliente = :id
                 AND p.Estado = 'Entregado'

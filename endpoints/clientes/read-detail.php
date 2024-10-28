@@ -15,36 +15,32 @@ $id = isset($_GET['id']) ? $_GET['id'] : ''; // NOT NULL
 
 // Verifica si el ID no está vacío
 if (!empty($id)) {
-    // Se prepara la consulta SQL para seleccionar el registro correspondiente al ID proporcionado.
-    $query = "  SELECT
-                    c.ID AS IDCliente,
+    // Consulta SQL modificada
+    $query = "  SELECT c.ID AS IDCliente,
                     c.Nombre,
                     c.Direccion,
                     c.IDSector,
                     s.NombreSector,
                     s.Comuna,
+                    pa.Frecuencia,
                     c.Telefono,
                     c.Telefono2,
                     c.LinkMaps,
-                    COALESCE(
-                        c.DiaRepartoExcepcional, s.DiaReparto
-                    ) AS Dia_de_Reparto,
+                    COALESCE(c.DiaRepartoExcepcional, s.DiaReparto) AS Dia_de_Reparto,
                     c.Observacion,
-                    CASE WHEN EXISTS (
-                        SELECT
-                            1
-                        FROM
-                            pedidos
-                        WHERE
-                            IDCliente = c.ID
-                            AND Pagado = 'No'
-                            AND Estado = 'Entregado'
-                        ) THEN 'Tiene deuda' ELSE NULL END AS Deuda
-                FROM
-                    clientes c
-                    JOIN sector s ON c.IDSector = s.ID
-                WHERE
-                    c.id = :id";
+                    CASE
+                        WHEN EXISTS
+                                (SELECT 1
+                                FROM pedidos
+                                WHERE IDCliente = c.ID
+                                    AND Pagado = 'No'
+                                    AND Estado = 'Entregado' ) THEN 'Tiene deuda'
+                        ELSE NULL
+                    END AS Deuda
+                FROM clientes c
+                JOIN sector s ON c.IDSector = s.ID
+                LEFT JOIN pedidos_automaticos pa ON pa.IDCliente = c.ID
+                WHERE c.id = :id";
 
     $stmt = $db->prepare($query);
     $stmt->bindParam(':id', $id);

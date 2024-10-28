@@ -18,6 +18,18 @@
                 <Excel :items="items" />
             </div>
         </div>
+        <div class="flex justify-center">
+        <!-- INPUT FILTRAR -->
+        <label class="input input-bordered flex items-center gap-2">
+            <input v-model="filterText" type="text" class="grow" placeholder="Nombre, dirección, sector o comuna..." />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+                class="h-4 w-4 opacity-70">
+                <path fill-rule="evenodd"
+                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                    clip-rule="evenodd" />
+            </svg>
+        </label>
+    </div>
     </div>
     <!-- RESULTADOS -->
     <div class="overflow-x-auto">
@@ -42,7 +54,7 @@
             </thead>
             <!-- Body -->
             <tbody>
-                <tr v-for="item in items" :key="item.ID">
+                <tr v-for="item in filteredItems" :key="item.ID">
                     <th>
                         <div v-if="item.IDPA" class="tooltip tooltip-right"
                             data-tip="Pedido creado automáticamente">
@@ -116,7 +128,22 @@ export default {
             fechaSeleccionada: new Date(),
             nuevaFechaReparto: new Date(),
             isLoading: false,
+            filterText: '', // Añadido para el filtro
         };
+    },
+
+    computed: {
+        filteredItems() {
+            return this.items.filter(item => {
+                const normalizedFilterText = this.filterText.toLowerCase();
+                return (
+                    item.Nombre.toLowerCase().includes(normalizedFilterText) ||
+                    item.Direccion.toLowerCase().includes(normalizedFilterText) ||
+                    item.NombreSector.toLowerCase().includes(normalizedFilterText) ||
+                    item.Comuna.toLowerCase().includes(normalizedFilterText)
+                );
+            });
+        },
     },
 
     methods: {
@@ -177,7 +204,7 @@ export default {
             const fechaFormateada = this.formatearFechaHora(this.nuevaFechaReparto);
             const errores = [];
             
-            for (const item of this.items) {
+            for (const item of this.filteredItems) {
                 try {
                     const url = `https://nuestrocampo.cl/api/pedidos/update_fecha_reparto.php?id=${item.ID}&nuevaFecha=${encodeURIComponent(fechaFormateada)}`;
                     const response = await axios.get(url);
@@ -218,3 +245,4 @@ export default {
     components: { EliminarPedido, DetallePedido, EditarPedido, Excel, VCalendar },
 }
 </script>
+

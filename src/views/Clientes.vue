@@ -128,9 +128,18 @@
                                 :comuna="item.Comuna" :sector="item.NombreSector" :id_sector="item.IDSector"
                                 :dia="item.diaDeReparto" :direccion="item.Direccion" :telefono="item.Telefono"
                                 :telefono2="item.Telefono2" :linkmaps="item.LinkMaps" :frecuencia="item.freq"
-                                :observaciones="item.Observacion" producto_preferido="no" id_producto_preferido="noid" />
+                                :observaciones="item.Observacion" producto_preferido="no"
+                                id_producto_preferido="noid" />
                             <!-- Eliminar Cliente -->
                             <EliminarCliente v-if="this.rol != 'Repartidor'" :id="item.ID + 'eliminar'" />
+                            <!-- Botón para ir a Detalle del Cliente -->
+                            <button @click="verDetalleCliente(item.ID)" class="btn btn-outline btn-info">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -208,7 +217,7 @@ export default {
             this.selectedSus = '';
         },
         async copyToClipboard(info) {
-            let link = `https://nuestrocampo.cl/clientes/detalle/${info}`
+            let link = `https://nuestrocampo.cl/sistemav2/clientes/detalle/${info}`
             if (navigator.clipboard) {
                 try {
                     await navigator.clipboard.writeText(link);
@@ -235,6 +244,10 @@ export default {
         },
         loadMore() {
             this.currentPage++;
+        },
+        verDetalleCliente(id) {
+            // Cambiado para abrir en una nueva pestaña
+            window.open(`../sistemav2/clientes/detalle/${id}`, '_blank');
         },
     },
 
@@ -294,3 +307,4 @@ export default {
     components: { CrearCliente, EliminarCliente, EditarCliente, CrearPedido, CrearPedidoAuto, Excel, DetalleClienteDeudor },
 }
 </script>
+
